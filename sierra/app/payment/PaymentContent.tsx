@@ -69,7 +69,7 @@ export default function PaymentContent() {
   useEffect(() => {
     const fetchPackage = async () => {
       try {
-        const res = await fetch(`http://localhost:8000/api/explore/packages/${pkgId}`)
+        const res = await fetch(`https://sierra-coi7.onrender.com/api/explore/packages/${pkgId}`)
         if (!res.ok) throw new Error("Invalid response")
         const data = await res.json()
         setPkg(data)
