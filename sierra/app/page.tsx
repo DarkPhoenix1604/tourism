@@ -1,8 +1,6 @@
-export { default } from "./explore/page"
-// export default function Home({ children }: { children: React.ReactNode }) {
-//   return (
-//     <div>
-//       <div >{children}</div>
-//     </div>
-//   )
-// }
+"use client"
+import ExplorePage from "./explore/page"
+
+export default function Home() {
+  return <ExplorePage />
+}
