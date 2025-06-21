@@ -1,5 +1,5 @@
 import express from "express";
-import Explore from "../models/Explore.js"; // Make sure this path is correct
+import Explore from "../models/explore.js"; // Make sure this path is correct
 
 const router = express.Router();
 
