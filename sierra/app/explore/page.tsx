@@ -28,7 +28,7 @@ export default function ExplorePage() {
     useEffect(() => {
         const fetchPackages = async () => {
             try {
-                const res = await fetch("http://localhost:8000/api/explore/packages") // replace with deployed URL in prod
+                const res = await fetch("https://sierra-coi7.onrender.com/api/explore/packages") // replace with deployed URL in prod
                 const data = await res.json()
                 setTourismPackages(data)
             } catch (err) {

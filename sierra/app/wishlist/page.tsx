@@ -33,7 +33,7 @@ export default function ExplorePage() {
   useEffect(() => {
     const fetchItinerary = async () => {
       try {
-        const res = await fetch(`http://localhost:8000/api/wishlist/user/${userEmail}`)
+        const res = await fetch(`https://sierra-coi7.onrender.com/api/wishlist/user/${userEmail}`)
         const data = await res.json()
         const formattedPlaces = (data as WishlistItem[]).map((item, index) => ({
           id: index + 1,

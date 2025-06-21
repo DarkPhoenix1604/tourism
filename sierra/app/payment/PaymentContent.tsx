@@ -46,7 +46,7 @@ export default function PaymentContent() {
     }    
 
     try {
-      const res = await fetch("http://localhost:8000/api/bookings", {
+      const res = await fetch("https://sierra-coi7.onrender.com/api/bookings", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

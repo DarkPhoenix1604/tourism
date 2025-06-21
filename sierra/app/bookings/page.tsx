@@ -32,7 +32,7 @@ export default function UpcomingBookingsPage() {
 
     const fetchBookings = async () => {
       try {
-        const res = await fetch(`http://localhost:8000/api/bookings/user/${userEmail}`)
+        const res = await fetch(`https://sierra-coi7.onrender.com/api/bookings/user/${userEmail}`)
         const data = await res.json()
 
         const upcoming = data.filter((booking: Booking) => {
