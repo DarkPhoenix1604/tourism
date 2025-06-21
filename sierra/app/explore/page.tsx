@@ -1,5 +1,4 @@
 "use client"
-import Image from "next/image";
 import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
 import {
@@ -56,14 +55,14 @@ export default function ExplorePage() {
                             {pkg.images.map((url, index) => (
                                 <CarouselItem key={index}>
                                     <div className="relative w-full h-[500px]">
-                                        <Image
-                                            src={url}
-                                            alt={`Image ${index + 1} of ${pkg.name}`}
-                                            fill
-                                            className="object-cover rounded-xl"
-                                            sizes="100vw"
-                                            priority={index === 0}
-                                        />
+                                        <div className="relative w-full h-[500px]">
+                                            <img
+                                                src={url}
+                                                alt={`Image ${index + 1} of ${pkg.name}`}
+                                                loading="lazy"
+                                                className="object-cover w-full h-full rounded-xl"
+                                            />
+                                        </div>
                                     </div>
                                 </CarouselItem>
                             ))}
