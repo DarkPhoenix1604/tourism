@@ -38,6 +38,10 @@ app.use("/api/bookings", bookingRoutes)
 app.use("/api/wishlist", wishlistRoutes)
 
 // ✅ Correct SSR handler for Next.js
+app.get("/", (req, res) => {
+  res.redirect("/explore")
+})
+
 app.all("/*path", async (req, res) => {
   try {
     await handle(req, res)
