@@ -1,13 +1,11 @@
 "use client"
 import { MenuIcon } from "lucide-react"
-import NewDocumentButton from "./NewDocumentButton"
 import { Button } from "./ui/button";
 import { useRouter } from "next/navigation"
 
 import {
     Sheet,
     SheetContent,
-    SheetDescription,
     SheetHeader,
     SheetTitle,
     SheetTrigger,

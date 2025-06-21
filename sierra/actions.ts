@@ -5,7 +5,7 @@ import { adminDb } from "./firebase-admin";
 import { title } from "process";
 
 export async function CreateNewDocument() {
-    auth().protect();
+    auth();
     const {sessionClaims} = await auth();
     const docCollectionRef = adminDb.collection("documents");
     const docRef = await docCollectionRef.add({

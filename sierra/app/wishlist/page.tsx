@@ -5,10 +5,9 @@ import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { Calendar } from "@/components/ui/calendar"
 import { Popover, PopoverTrigger, PopoverContent } from "@/components/ui/popover"
-import { CalendarDays, Edit, Trash2, Save } from "lucide-react"
+import { CalendarDays, Edit, Trash2 } from "lucide-react"
 import { format } from "date-fns"
 import { useUser } from "@clerk/nextjs"
-import { cn } from "@/lib/utils"
 
 interface Place {
   id: number
@@ -16,6 +15,12 @@ interface Place {
   date: Date
   isEditing?: boolean
 }
+
+interface WishlistItem {
+  placeName: string
+  visitDate: string
+}
+
 
 export default function ExplorePage() {
   const [places, setPlaces] = useState<Place[]>([])
@@ -30,7 +35,7 @@ export default function ExplorePage() {
       try {
         const res = await fetch(`http://localhost:8000/api/wishlist/user/${userEmail}`)
         const data = await res.json()
-        const formattedPlaces = data.map((item: any, index: number) => ({
+        const formattedPlaces = (data as WishlistItem[]).map((item, index) => ({
           id: index + 1,
           name: item.placeName,
           date: new Date(item.visitDate),
