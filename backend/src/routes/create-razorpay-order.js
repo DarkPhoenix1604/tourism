@@ -1,6 +1,6 @@
-const express = require("express");
-const Razorpay = require("razorpay");
-const { v4: uuidv4 } = require("uuid");
+import express from "express";
+import Razorpay from "razorpay";
+import { v4 as uuidv4 } from "uuid";
 
 const router = express.Router();
 
@@ -28,4 +28,4 @@ router.post("/", async (req, res) => {
   }
 });
 
-export default router;
+export default router; // Export the router using ES module syntax
