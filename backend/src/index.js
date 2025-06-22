@@ -1,5 +1,3 @@
-// backend/server.js (or index.js)
-
 import express from "express"
 import dotenv from "dotenv"
 import connectDB from "./lib/db.js"
@@ -7,6 +5,7 @@ import cors from "cors"
 import exploreRoutes from "./routes/exploreRoutes.js"
 import bookingRoutes from "./routes/bookingRoutes.js"
 import wishlistRoutes from "./routes/wishlistRoutes.js"
+import createRazorpayOrderRoute from "./routes/create-razorpay-order.js" // Import Razorpay route
 import path from "path"
 import { fileURLToPath } from "url"
 import next from "next"
@@ -36,6 +35,7 @@ app.use(express.json())
 app.use("/api/explore", exploreRoutes)
 app.use("/api/bookings", bookingRoutes)
 app.use("/api/wishlist", wishlistRoutes)
+app.use("/api/create-razorpay-order", createRazorpayOrderRoute) // Add the Razorpay route
 
 // ✅ Correct SSR handler for Next.js
 app.get("/", (req, res) => {

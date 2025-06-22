@@ -10,6 +10,7 @@ import {
 } from "@/components/ui/carousel"
 import { Button } from "@/components/ui/button"
 import Autoplay from "embla-carousel-autoplay"
+import { SignedIn, SignedOut, SignInButton } from "@clerk/nextjs"
 
 interface Package {
     _id: string // MongoDB document ID
@@ -70,13 +71,22 @@ export default function ExplorePage() {
                         <CarouselPrevious className="left-4" />
                         <CarouselNext className="right-4" />
                     </Carousel>
-
                     <div className="max-w-5xl mx-auto px-6 py-8 flex flex-col gap-4">
                         <h2 className="text-3xl font-bold">{pkg.name}</h2>
                         <p className="text-gray-700 text-lg">{pkg.description}</p>
                         <div className="flex justify-between items-center">
                             <span className="text-blue-600 text-2xl font-semibold">₹{pkg.price}</span>
-                            <Button onClick={() => handleBuy(pkg)}>Buy Now</Button>
+                            <SignedIn>
+                                <Button onClick={() => handleBuy(pkg)}>Buy Now</Button>
+                            </SignedIn>
+                            <SignedOut>
+                                <SignInButton mode="modal">
+                                    <Button>
+                                        Buy Now
+                                    </Button>
+                                </SignInButton>
+                            </SignedOut>
+
                         </div>
                     </div>
                 </div>

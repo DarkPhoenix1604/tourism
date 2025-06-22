@@ -31,8 +31,21 @@ export default function PaymentContent() {
   const { user } = useUser()
   const userEmail = user?.emailAddresses?.[0]?.emailAddress || ""
 
+  useEffect(() => {
+    // Dynamically load Razorpay script
+    const script = document.createElement("script");
+    script.src = "https://checkout.razorpay.com/v1/checkout.js";
+    script.async = true;
+    document.body.appendChild(script);
+
+    // Cleanup the script when the component unmounts
+    return () => {
+      document.body.removeChild(script);
+    };
+  }, []);
+  
   const handleBookingSubmit = async () => {
-    if (!pkg || !selectedDate || numPeople < 1) return
+    if (!pkg || !selectedDate || numPeople < 1) return;
 
     const bookingData = {
       invoiceId: pkg._id,
@@ -43,28 +56,60 @@ export default function PaymentContent() {
       paymentDate: new Date(),
       numPeople,
       userEmail,
-    }    
+    };
 
     try {
-      const res = await fetch("https://sierra-coi7.onrender.com/api/bookings", {
+      // Request Razorpay order creation from backend
+      const res = await fetch("/api/create-razorpay-order", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify(bookingData),
-      })
+        body: JSON.stringify({
+          amount: total, // Amount is in INR, you can change currency if needed
+          currency: "INR", // You can modify the currency if necessary
+        }),
+      });
 
-      if (!res.ok) throw new Error("Failed to post booking")
-      const result = await res.json()
-      console.log("Booking successful:", result)
+      if (!res.ok) throw new Error("Failed to create Razorpay order");
 
-      // Optional: Redirect or show confirmation
-      alert("Booking successful!")
+      const orderData = await res.json();
+
+      // Razorpay payment options
+      const options = {
+        key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID, // Razorpay Key ID
+        amount: orderData.amount, // Amount should be in paise
+        currency: "INR", // Currency
+        name: "Sierra", // Name of your business or website
+        description: "Outdoor Adventure Booking", // Description of the payment
+        order_id: orderData.id, // Razorpay order ID returned from the backend
+        handler: function (response: any) {
+          // Payment success handler
+          console.log("Payment Successful:", response);
+          alert("Booking successful!");
+
+          // Optionally, send the payment details to your backend for validation
+          // After successful payment, store the booking details in the database
+          // You can trigger another API to save booking details along with the payment response
+        },
+        prefill: {
+          name: user?.fullName || "Guest", // Prefill user name
+          email: userEmail, // Prefill user email
+        },
+        theme: {
+          color: "#F37254", // Customize Razorpay checkout button color
+        },
+      };
+
+      // Create Razorpay instance and open the checkout modal
+      const razorpay = new Razorpay(options);
+      razorpay.open();
     } catch (err) {
-      console.error("Booking failed:", err)
-      alert("Booking failed. Please try again.")
+      console.error("Booking failed:", err);
+      alert("Booking failed. Please try again.");
     }
-  }
+  };
+
 
   useEffect(() => {
     const fetchPackage = async () => {
