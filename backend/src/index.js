@@ -5,7 +5,7 @@ import cors from "cors"
 import exploreRoutes from "./routes/exploreRoutes.js"
 import bookingRoutes from "./routes/bookingRoutes.js"
 import wishlistRoutes from "./routes/wishlistRoutes.js"
-import createRazorpayOrderRoute from "./routes/create-razorpay-order.js" // Import Razorpay route
+// import createRazorpayOrderRoute from "./routes/create-razorpay-order.js" 
 import path from "path"
 import { fileURLToPath } from "url"
 import next from "next"
@@ -35,7 +35,7 @@ app.use(express.json())
 app.use("/api/explore", exploreRoutes)
 app.use("/api/bookings", bookingRoutes)
 app.use("/api/wishlist", wishlistRoutes)
-app.use("/api/create-razorpay-order", createRazorpayOrderRoute) // Add the Razorpay route
+// app.use("/api/create-razorpay-order", createRazorpayOrderRoute)
 
 // ✅ Correct SSR handler for Next.js
 app.get("/", (req, res) => {
