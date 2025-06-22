@@ -31,6 +31,12 @@ export default function PaymentContent() {
   const { user } = useUser()
   const userEmail = user?.emailAddresses?.[0]?.emailAddress || ""
 
+  interface RazorpayPaymentResponse {
+    razorpay_payment_id: string;
+    razorpay_order_id: string;
+    razorpay_signature: string;
+  }
+
   useEffect(() => {
     // Dynamically load Razorpay script
     const script = document.createElement("script");
@@ -43,20 +49,20 @@ export default function PaymentContent() {
       document.body.removeChild(script);
     };
   }, []);
-  
+
   const handleBookingSubmit = async () => {
     if (!pkg || !selectedDate || numPeople < 1) return;
 
-    const bookingData = {
-      invoiceId: pkg._id,
-      packageName: pkg.name,
-      paymentMethod,
-      paymentAmount: total,
-      bookingDate: selectedDate,
-      paymentDate: new Date(),
-      numPeople,
-      userEmail,
-    };
+    // const bookingData = {
+    //   invoiceId: pkg._id,
+    //   packageName: pkg.name,
+    //   paymentMethod,
+    //   paymentAmount: total,
+    //   bookingDate: selectedDate,
+    //   paymentDate: new Date(),
+    //   numPeople,
+    //   userEmail,
+    // };
 
     try {
       // Request Razorpay order creation from backend
@@ -83,7 +89,7 @@ export default function PaymentContent() {
         name: "Sierra", // Name of your business or website
         description: "Outdoor Adventure Booking", // Description of the payment
         order_id: orderData.id, // Razorpay order ID returned from the backend
-        handler: function (response: any) {
+        handler: function (response: RazorpayPaymentResponse) {
           // Payment success handler
           console.log("Payment Successful:", response);
           alert("Booking successful!");
