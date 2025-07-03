@@ -1,6 +1,6 @@
 import express from 'express';
-import { Webhook } from '@clerk/clerk-sdk-node';
-import { connectToDB } from '../lib/db.js';
+import * as clerk from '@clerk/backend';
+// import { connnectDB } from '../lib/db.js';
 import { User } from '../models/user.js';
 
 const router = express.Router();
