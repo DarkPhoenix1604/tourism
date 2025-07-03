@@ -22,21 +22,31 @@ router.post('/clerk', express.raw({ type: '*/*' }), async (req, res) => {
     console.log('✅ Clerk event verified:', evt.type);
 
     if (evt.type === 'user.created') {
-      const email = evt.data.email_addresses?.[0]?.email_address;
-
-      if (!email) return res.status(400).json({ error: 'No email found' });
-
-      await connectDB(); // ✅ Using default imported function
-
-      await User.findOneAndUpdate(
-        { email },
-        { email, role: 'user' },
-        { upsert: true, new: true }
-      );
-
-      console.log('✅ User saved to MongoDB');
-      return res.status(200).json({ message: 'User saved' });
-    }
+        const email = evt.data.email_addresses?.[0]?.email_address;
+        const firstName = evt.data.first_name || '';
+        const lastName = evt.data.last_name || '';
+        const fullName = `${firstName} ${lastName}`.trim();
+      
+        if (!email) {
+          return res.status(400).json({ error: 'No email found' });
+        }
+      
+        await connectDB();
+      
+        await User.findOneAndUpdate(
+          { email },
+          {
+            email,
+            role: 'user',              // default role
+            name: fullName,            // optional: store name too
+            image: evt.data.image_url, // optional: store profile image
+          },
+          { upsert: true, new: true }
+        );
+      
+        console.log('✅ User saved:', email);
+        return res.status(200).json({ message: 'User saved' });
+      }      
 
     return res.status(200).json({ message: 'Event ignored' });
   } catch (err) {
