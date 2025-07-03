@@ -5,6 +5,7 @@ import cors from "cors";
 import exploreRoutes from "./routes/exploreRoutes.js";
 import bookingRoutes from "./routes/bookingRoutes.js";
 import wishlistRoutes from "./routes/wishlistRoutes.js";
+import userRoutes from './routes/userroutes.js'
 import path from "path";
 import { fileURLToPath } from "url";
 import next from "next";
@@ -40,6 +41,7 @@ app.use(express.json()); // This will now apply to all routes defined below.
 app.use("/api/explore", exploreRoutes);
 app.use("/api/bookings", bookingRoutes);
 app.use("/api/wishlist", wishlistRoutes);
+app.use('/api/users', userRoutes);
 
 // 4. Define the Next.js page handler as the final catch-all.
 app.get("/", (req, res) => {

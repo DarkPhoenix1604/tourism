@@ -1,6 +1,44 @@
-import React from 'react';
+'use client'
+import React, { useEffect, useState } from 'react';
+import { useUser } from '@clerk/clerk-react';
 
 const AdminDashboard = () => {
+    const { user, isLoaded } = useUser();
+    const [isAdmin, setIsAdmin] = useState(false);
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        const checkAdmin = async () => {
+            if (!isLoaded || !user?.emailAddresses?.[0]?.emailAddress) return;
+
+            try {
+                const res = await fetch(`https://sierra-coi7.onrender.com//api/users`);
+                console.log(res);
+                const data = await res.json();
+
+                const matchedUser = data.find(
+                    (u: { email: string; role?: string }) =>
+                      u.email.toLowerCase() ===
+                      user.emailAddresses[0].emailAddress.toLowerCase()
+                  );
+                  
+                if (matchedUser?.role === 'admin') {
+                    setIsAdmin(true);
+                }
+
+                setLoading(false);
+            } catch (err) {
+                console.error('Failed to fetch users:', err);
+                setLoading(false);
+            }
+        };
+
+        checkAdmin();
+    }, [isLoaded, user]);
+
+    if (loading) return <div className="p-6">Loading...</div>;
+    if (!isAdmin) return <div className="p-6 text-red-600">Access Denied: Admins Only</div>;
+
     return (
         <div className="min-h-screen bg-gray-100">
             <header className="bg-blue-600 text-white p-4">
