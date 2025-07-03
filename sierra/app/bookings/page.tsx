@@ -10,7 +10,6 @@ import { Textarea } from "@/components/ui/textarea";
 import {
   Table,
   TableBody,
-  TableCaption,
   TableCell,
   TableHead,
   TableHeader,
@@ -51,10 +50,28 @@ const AdminDashboard = () => {
         const matchedUser = data.find(
           (u: UserType) => u.email.toLowerCase() === safeEmail.toLowerCase()
         );
+
         if (matchedUser?.role === "admin") {
           setIsAdmin(true);
-          fetchAllUsers();
-          fetchAllBookings();
+
+          // ✅ fetchAllUsers defined inline
+          const fetchAllUsers = async () => {
+            const res = await fetch("https://sierra-coi7.onrender.com/api/users");
+            const data: UserType[] = await res.json();
+            setUsers(data);
+          };
+
+          // ✅ fetchAllBookings defined inline
+          const fetchAllBookings = async () => {
+            const res = await fetch("https://sierra-coi7.onrender.com/api/bookings/all", {
+              headers: { "x-user-email": safeEmail },
+            });
+            const data: BookingType[] = await res.json();
+            setBookings(data);
+          };
+
+          await fetchAllUsers();
+          await fetchAllBookings();
         }
       } catch (err) {
         console.error("Admin check failed", err);
@@ -65,20 +82,6 @@ const AdminDashboard = () => {
 
     checkAdmin();
   }, [isLoaded, user]);
-
-  const fetchAllUsers = async () => {
-    const res = await fetch("https://sierra-coi7.onrender.com/api/users");
-    const data: UserType[] = await res.json();
-    setUsers(data);
-  };
-
-  const fetchAllBookings = async () => {
-    const res = await fetch("https://sierra-coi7.onrender.com/api/bookings/all", {
-      headers: { "x-user-email": user!.emailAddresses[0]!.emailAddress },
-    });
-    const data: BookingType[] = await res.json();
-    setBookings(data);
-  };
 
   const handleFormChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
