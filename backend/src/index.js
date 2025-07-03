@@ -9,6 +9,7 @@ import wishlistRoutes from "./routes/wishlistRoutes.js"
 import path from "path"
 import { fileURLToPath } from "url"
 import next from "next"
+import webhookRoutes from './routes/webhook.js';
 
 dotenv.config()
 
@@ -36,7 +37,7 @@ app.use("/api/explore", exploreRoutes)
 app.use("/api/bookings", bookingRoutes)
 app.use("/api/wishlist", wishlistRoutes)
 // app.use("/api/create-razorpay-order", createRazorpayOrderRoute)
-
+app.use('/webhook', webhookRoutes);
 // ✅ Correct SSR handler for Next.js
 app.get("/", (req, res) => {
   res.redirect("/explore")
