@@ -1,5 +1,5 @@
 import express from 'express';
-import { Webhook } from 'clerk-sdk-node';
+import { Webhook } from '@clerk/clerk-sdk-node';
 import { connectToDB } from '../lib/db.js';
 import { User } from '../models/user.js';
 
