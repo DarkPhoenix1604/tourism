@@ -1,201 +1,111 @@
-"use client";
+"use client"
 
-import React, { useEffect, useState } from "react";
-import { useUser } from "@clerk/clerk-react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
 import {
   Table,
   TableBody,
+  TableCaption,
   TableCell,
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table";
+} from "@/components/ui/table"
+import { useUser } from "@clerk/nextjs"
+import { useEffect, useMemo, useState } from "react"
 
-// Type definitions
-type UserType = {
-  _id: string;
-  name?: string;
-  email: string;
-  role?: string;
-};
+interface Booking {
+  _id: string
+  paymentMethod: string
+  paymentAmount: number
+  packageName: string
+  paymentDate: string
+  bookingDate: string
+  numPeople: number
+}
 
-type BookingType = {
-  _id: string;
-  userEmail: string;
-  packageName?: string;
-  paymentDate?: string;
-};
-
-const AdminDashboard = () => {
-  const { user, isLoaded } = useUser();
-  const [isAdmin, setIsAdmin] = useState(false);
-  const [loading, setLoading] = useState(true);
-  const [users, setUsers] = useState<UserType[]>([]);
-  const [bookings, setBookings] = useState<BookingType[]>([]);
-  const [form, setForm] = useState({ name: "", description: "", price: "", images: "" });
+export default function UpcomingBookingsPage() {
+  const { user, isLoaded } = useUser()
+  const userEmail = useMemo(() => user?.emailAddresses?.[0]?.emailAddress || "", [user])
+  const [bookings, setBookings] = useState<Booking[]>([])
+  const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    const checkAdmin = async () => {
-      const safeEmail = user?.emailAddresses?.[0]?.emailAddress;
-      if (!isLoaded || !safeEmail) return;
+    if (!isLoaded || !userEmail) return
 
+    const fetchBookings = async () => {
       try {
-        const res = await fetch("https://sierra-coi7.onrender.com/api/users");
-        const data: UserType[] = await res.json();
-        const matchedUser = data.find(
-          (u: UserType) => u.email.toLowerCase() === safeEmail.toLowerCase()
-        );
+        const res = await fetch(
+          `https://sierra-coi7.onrender.com/api/bookings/user/${userEmail}`
+        )
+        const data = await res.json()
 
-        if (matchedUser?.role === "admin") {
-          setIsAdmin(true);
+        const today = new Date()
+        today.setHours(0, 0, 0, 0)
 
-          // ✅ fetchAllUsers defined inline
-          const fetchAllUsers = async () => {
-            const res = await fetch("https://sierra-coi7.onrender.com/api/users");
-            const data: UserType[] = await res.json();
-            setUsers(data);
-          };
+        const upcoming = data.filter((booking: Booking) => {
+          const tripDate = new Date(booking.bookingDate)
+          tripDate.setHours(0, 0, 0, 0)
+          return tripDate >= today
+        })
 
-          // ✅ fetchAllBookings defined inline
-          const fetchAllBookings = async () => {
-            const res = await fetch("https://sierra-coi7.onrender.com/api/bookings/all", {
-              headers: { "x-user-email": safeEmail },
-            });
-            const data: BookingType[] = await res.json();
-            setBookings(data);
-          };
-
-          await fetchAllUsers();
-          await fetchAllBookings();
-        }
+        setBookings(upcoming)
       } catch (err) {
-        console.error("Admin check failed", err);
+        console.error("Error fetching bookings:", err)
       } finally {
-        setLoading(false);
+        setLoading(false)
       }
-    };
-
-    checkAdmin();
-  }, [isLoaded, user]);
-
-  const handleFormChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    const { name, value } = e.target;
-    setForm((prev) => ({ ...prev, [name]: value }));
-  };
-
-  const submitNewExplore = async () => {
-    try {
-      const res = await fetch("https://sierra-coi7.onrender.com/api/packages", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "x-user-email": user!.emailAddresses[0]!.emailAddress,
-        },
-        body: JSON.stringify({
-          ...form,
-          images: form.images.split(",").map((url) => url.trim()),
-          price: parseFloat(form.price),
-        }),
-      });
-      if (res.ok) {
-        alert("Package added!");
-        setForm({ name: "", description: "", price: "", images: "" });
-      } else {
-        alert("Failed to add package.");
-      }
-    } catch (err) {
-      console.error("Error posting package", err);
     }
-  };
 
-  if (loading) return <div className="p-6">Loading...</div>;
-  if (!isAdmin) return <div className="p-6 text-red-600">Access Denied: Admins Only</div>;
+    fetchBookings()
+  }, [userEmail, isLoaded])
 
   return (
-    <div className="min-h-screen bg-gray-100 p-6 grid gap-6">
-      <Card>
-        <CardHeader>
-          <CardTitle>Users</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Name</TableHead>
-                <TableHead>Email</TableHead>
-                <TableHead>Role</TableHead>
+    <div className="grid grid-cols-1 max-w-5xl mx-auto px-4 py-10">
+      <div className="col-span-full text-center text-2xl font-bold mb-6 text-gray-800">
+        Upcoming Bookings
+      </div>
+      <Table>
+        <TableCaption>Only your upcoming trips are shown here.</TableCaption>
+        <TableHeader>
+          <TableRow>
+            <TableHead>Package</TableHead>
+            <TableHead>Date of Trip</TableHead>
+            <TableHead>People</TableHead>
+            <TableHead>Method</TableHead>
+            <TableHead className="text-right">Amount</TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          {loading ? (
+            <TableRow>
+              <TableCell colSpan={5} className="text-center text-gray-500">
+                Loading...
+              </TableCell>
+            </TableRow>
+          ) : bookings.length === 0 ? (
+            <TableRow>
+              <TableCell colSpan={5} className="text-center text-gray-500">
+                No upcoming bookings found.
+              </TableCell>
+            </TableRow>
+          ) : (
+            bookings.map((booking) => (
+              <TableRow key={booking._id}>
+                <TableCell>{booking.packageName}</TableCell>
+                <TableCell>
+                  {new Date(booking.bookingDate).toLocaleDateString("en-IN", {
+                    day: "2-digit",
+                    month: "short",
+                    year: "numeric",
+                  })}
+                </TableCell>
+                <TableCell>{booking.numPeople}</TableCell>
+                <TableCell>{booking.paymentMethod}</TableCell>
+                <TableCell className="text-right">₹{booking.paymentAmount}</TableCell>
               </TableRow>
-            </TableHeader>
-            <TableBody>
-              {users.map((u) => (
-                <TableRow key={u._id}>
-                  <TableCell>{u.name || "—"}</TableCell>
-                  <TableCell>{u.email}</TableCell>
-                  <TableCell>{u.role || "user"}</TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </CardContent>
-      </Card>
-
-      <Card>
-        <CardHeader>
-          <CardTitle>Bookings</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>User Email</TableHead>
-                <TableHead>Package</TableHead>
-                <TableHead>Payment Date</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {bookings.map((b) => (
-                <TableRow key={b._id}>
-                  <TableCell>{b.userEmail}</TableCell>
-                  <TableCell>{b.packageName || "—"}</TableCell>
-                  <TableCell>{new Date(b.paymentDate || "").toLocaleDateString()}</TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </CardContent>
-      </Card>
-
-      <Card>
-        <CardHeader>
-          <CardTitle>Add New Explore Package</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="grid gap-2">
-            <Label>Name</Label>
-            <Input name="name" value={form.name} onChange={handleFormChange} />
-          </div>
-          <div className="grid gap-2">
-            <Label>Description</Label>
-            <Textarea name="description" value={form.description} onChange={handleFormChange} />
-          </div>
-          <div className="grid gap-2">
-            <Label>Price</Label>
-            <Input name="price" value={form.price} onChange={handleFormChange} type="number" />
-          </div>
-          <div className="grid gap-2">
-            <Label>Image URLs (comma-separated)</Label>
-            <Input name="images" value={form.images} onChange={handleFormChange} />
-          </div>
-          <Button onClick={submitNewExplore}>Submit</Button>
-        </CardContent>
-      </Card>
+            ))
+          )}
+        </TableBody>
+      </Table>
     </div>
-  );
-};
-
-export default AdminDashboard;
+  )
+}
