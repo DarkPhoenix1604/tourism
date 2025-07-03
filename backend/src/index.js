@@ -30,6 +30,7 @@ await nextApp.prepare()
 const app = express()
 
 app.use(cors({ origin: "http://localhost:3000" }))
+app.use('/webhook', webhookRoutes);
 app.use(express.json())
 
 // ✅ API Routes
@@ -37,7 +38,6 @@ app.use("/api/explore", exploreRoutes)
 app.use("/api/bookings", bookingRoutes)
 app.use("/api/wishlist", wishlistRoutes)
 // app.use("/api/create-razorpay-order", createRazorpayOrderRoute)
-app.use('/webhook', webhookRoutes);
 // ✅ Correct SSR handler for Next.js
 app.get("/", (req, res) => {
   res.redirect("/explore")

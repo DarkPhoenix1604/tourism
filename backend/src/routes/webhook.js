@@ -1,5 +1,5 @@
 import express from 'express';
-import * as clerk from '@clerk/backend';
+// import * as clerk from '@clerk/backend';
 // import { connnectDB } from '../lib/db.js';
 import { User } from '../models/user.js';
 
