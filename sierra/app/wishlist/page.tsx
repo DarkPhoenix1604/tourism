@@ -65,7 +65,7 @@ export default function ExplorePage() {
     setIdCounter(idCounter + 1)
 
     try {
-      const res = await fetch("http://localhost:8000/api/wishlist", {
+      const res = await fetch("https://sierra-coi7.onrender.com/api/wishlist", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -91,7 +91,7 @@ export default function ExplorePage() {
     setPlaces(places.filter((p) => p.id !== id))
 
     try {
-      await fetch(`http://localhost:8000/api/wishlist/delete`, {
+      await fetch(`https://sierra-coi7.onrender.com/api/wishlist/delete`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
