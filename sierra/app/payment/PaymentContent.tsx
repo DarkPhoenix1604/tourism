@@ -32,39 +32,76 @@ export default function PaymentContent() {
   const userEmail = user?.emailAddresses?.[0]?.emailAddress || ""
 
   const handleBookingSubmit = async () => {
-    if (!pkg || !selectedDate || numPeople < 1) return
+    if (!pkg || !selectedDate || numPeople < 1) return;
 
-    const bookingData = {
-      invoiceId: pkg._id,
-      packageName: pkg.name,
-      paymentMethod,
-      paymentAmount: total,
-      bookingDate: selectedDate,
-      paymentDate: new Date(),
-      numPeople,
-      userEmail,
-    }    
+    const amount = total * 100; // Razorpay takes amount in paise
 
     try {
-      const res = await fetch("https://sierra-coi7.onrender.com/api/bookings", {
+      // Step 1: Create Razorpay order via backend
+      const orderRes = await fetch("https://sierra-coi7.onrender.com/api/payment", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify(bookingData),
-      })
+        body: JSON.stringify({ amount, currency: "INR" }),
+      });
 
-      if (!res.ok) throw new Error("Failed to post booking")
-      const result = await res.json()
-      console.log("Booking successful:", result)
+      const orderData = await orderRes.json();
 
-      // Optional: Redirect or show confirmation
-      alert("Booking successful!")
+      if (!orderData.id) throw new Error("Order creation failed");
+
+      // Step 2: Launch Razorpay checkout
+      const options = {
+        key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID!, // set in .env.local
+        amount: amount,
+        currency: "INR",
+        name: "Sierra Travel",
+        description: `Booking for ${pkg.name}`,
+        order_id: orderData.id,
+        prefill: {
+          email: userEmail,
+        },
+        handler: async function (response: any) {
+          // Step 3: Save booking to DB
+          const bookingData = {
+            invoiceId: pkg._id,
+            packageName: pkg.name,
+            paymentMethod,
+            paymentAmount: total,
+            bookingDate: selectedDate,
+            paymentDate: new Date(),
+            numPeople,
+            userEmail,
+            razorpayOrderId: response.razorpay_order_id,
+            razorpayPaymentId: response.razorpay_payment_id,
+            razorpaySignature: response.razorpay_signature,
+          };
+
+          const res = await fetch("https://sierra-coi7.onrender.com/api/bookings", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify(bookingData),
+          });
+
+          if (!res.ok) throw new Error("Booking failed after payment");
+          alert("Booking successful!");
+        },
+        theme: {
+          color: "#6366f1",
+        },
+      };
+
+      const rzp = new (window as any).Razorpay(options);
+      rzp.open();
+
     } catch (err) {
-      console.error("Booking failed:", err)
-      alert("Booking failed. Please try again.")
+      console.error("Payment failed:", err);
+      alert("Payment or booking failed. Please try again.");
     }
-  }
+  };
+
 
   useEffect(() => {
     const fetchPackage = async () => {
@@ -82,6 +119,17 @@ export default function PaymentContent() {
 
     if (pkgId) fetchPackage()
   }, [pkgId])
+  useEffect(() => {
+    const script = document.createElement("script");
+    script.src = "https://checkout.razorpay.com/v1/checkout.js";
+    script.async = true;
+    document.body.appendChild(script);
+
+    return () => {
+      document.body.removeChild(script); // Clean up
+    };
+  }, []);
+
 
   if (loading) return <div className="p-6 text-center">Loading...</div>
   if (!pkg) return <div className="p-6 text-center text-red-600">Invalid package selected.</div>

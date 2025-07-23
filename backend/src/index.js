@@ -10,6 +10,8 @@ import path from "path";
 import { fileURLToPath } from "url";
 import next from "next";
 import webhookRoutes from './routes/webhook.js';
+import paymentRoutes from "./routes/create-razorpay-order.js";
+
 
 dotenv.config();
 
@@ -42,6 +44,7 @@ app.use("/api/explore", exploreRoutes);
 app.use("/api/bookings", bookingRoutes);
 app.use("/api/wishlist", wishlistRoutes);
 app.use('/api/users', userRoutes);
+app.use("/api/payment", paymentRoutes);
 
 // 4. Define the Next.js page handler as the final catch-all.
 app.get("/", (req, res) => {
