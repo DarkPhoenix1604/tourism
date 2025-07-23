@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import { useUser } from "@clerk/clerk-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -42,6 +42,21 @@ const AdminDashboard = () => {
   const [bookings, setBookings] = useState<BookingType[]>([]);
   const [form, setForm] = useState({ name: "", description: "", price: "", images: "" });
 
+  const fetchAllUsers = useCallback(async () => {
+    const res = await fetch(`${BASE_URL}/api/users`);
+    const data: UserType[] = await res.json();
+    setUsers(data);
+  }, []);
+
+  const fetchAllBookings = useCallback(async () => {
+    if (!user) return;
+    const res = await fetch(`${BASE_URL}/api/bookings/all`, {
+      headers: { "x-user-email": user.emailAddresses[0]!.emailAddress },
+    });
+    const data: BookingType[] = await res.json();
+    setBookings(data);
+  }, [user]);
+
   useEffect(() => {
     const checkAdmin = async () => {
       const safeEmail = user?.emailAddresses?.[0]?.emailAddress;
@@ -66,21 +81,8 @@ const AdminDashboard = () => {
     };
 
     checkAdmin();
-  }, [isLoaded, user]);
+  }, [isLoaded, user, fetchAllUsers, fetchAllBookings]); // ✅ fully specified deps
 
-  const fetchAllUsers = async () => {
-    const res = await fetch(`${BASE_URL}/api/users`);
-    const data: UserType[] = await res.json();
-    setUsers(data);
-  };
-
-  const fetchAllBookings = async () => {
-    const res = await fetch(`${BASE_URL}/api/bookings/all`, {
-      headers: { "x-user-email": user!.emailAddresses[0]!.emailAddress },
-    });
-    const data: BookingType[] = await res.json();
-    setBookings(data);
-  };
 
   const handleFormChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;

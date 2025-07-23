@@ -19,6 +19,11 @@ interface Package {
   name: string
   price: number
 }
+interface RazorpayPaymentResponse {
+  razorpay_payment_id: string
+  razorpay_order_id: string
+  razorpay_signature: string
+}
 
 export default function PaymentContent() {
   const [numPeople, setNumPeople] = useState<number>(1)
@@ -61,7 +66,7 @@ export default function PaymentContent() {
         prefill: {
           email: userEmail,
         },
-        handler: async function (response: any) {
+        handler: async function (response: RazorpayPaymentResponse) {
           // Step 3: Save booking to DB
           const bookingData = {
             invoiceId: pkg._id,
@@ -93,7 +98,7 @@ export default function PaymentContent() {
         },
       };
 
-      const rzp = new (window as any).Razorpay(options);
+      const rzp = new window.Razorpay(options);
       rzp.open();
 
     } catch (err) {
